@@ -1,4 +1,4 @@
-This project was bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app).
+This project was bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) to follow [SuperFluid tutorial](https://docs.superfluid.finance/superfluid/protocol-tutorials/frontend-+-nodejs).
 
 ## Project Structure
 
