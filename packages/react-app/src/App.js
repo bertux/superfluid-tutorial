@@ -1,24 +1,71 @@
 import { useQuery } from "@apollo/react-hooks";
-import { Contract } from "@ethersproject/contracts";
-import { getDefaultProvider } from "@ethersproject/providers";
+// import { Contract } from "@ethersproject/contracts";
+// import { getDefaultProvider } from "@ethersproject/providers";
 import React, { useEffect, useState } from "react";
 
 import { Body, Button, Header, Image, Link } from "./components";
 import logo from "./ethereumLogo.png";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 
-import { addresses, abis } from "@project/contracts";
+// import { addresses, abis } from "@project/contracts";
 import GET_TRANSFERS from "./graphql/subgraph";
 
-async function readOnChainData() {
-  // Should replace with the end-user wallet, e.g. Metamask
-  const defaultProvider = getDefaultProvider();
-  // Create an instance of an ethers.js Contract
-  // Read more about ethers.js on https://docs.ethers.io/v5/api/contract/contract/
-  const ceaErc20 = new Contract(addresses.ceaErc20, abis.erc20, defaultProvider);
-  // A pre-defined address that owns some CEAERC20 tokens
-  const tokenBalance = await ceaErc20.balanceOf("0x3f8CB69d9c0ED01923F11c829BaE4D9a4CB6c82C");
-  console.log({ tokenBalance: tokenBalance.toString() });
+import SuperfluidSDK from "@superfluid-finance/js-sdk";
+import { Web3Provider } from "@ethersproject/providers";
+
+// async function readOnChainData() {
+//   // Should replace with the end-user wallet, e.g. Metamask
+//   const defaultProvider = getDefaultProvider();
+//   // Create an instance of an ethers.js Contract
+//   // Read more about ethers.js on https://docs.ethers.io/v5/api/contract/contract/
+//   const ceaErc20 = new Contract(addresses.ceaErc20, abis.erc20, defaultProvider);
+//   // A pre-defined address that owns some CEAERC20 tokens
+//   const tokenBalance = await ceaErc20.balanceOf("0x3f8CB69d9c0ED01923F11c829BaE4D9a4CB6c82C");
+//   console.log({ tokenBalance: tokenBalance.toString() });
+// }
+
+async function setupSF() {
+  const sf = new SuperfluidSDK.Framework({
+    ethers: new Web3Provider(window.ethereum)
+  });
+  await sf.initialize()
+
+  const walletAddress = await window.ethereum.request({
+    method: 'eth_requestAccounts',
+    params: [
+      {
+        eth_accounts: {}
+      }
+    ]
+  });
+      
+  const carol = sf.user({
+      address: walletAddress[0],
+      token: '0xF2d68898557cCb2Cf4C10c3Ef2B034b2a69DAD00'
+  });
+  var details = await carol.details();
+  console.log(details);
+
+  // await carol.flow({
+  //   recipient: '0xF538b8d65C4ae4D09503A0F06F38486019750Aa4',
+  //   flowRate: '385802469135802'
+  // });
+  // details = await carol.details();
+  // console.log(details);
+
+  // await carol.flow({
+  //   recipient: '0xF538b8d65C4ae4D09503A0F06F38486019750Aa4',
+  //   flowRate: '10000000000000' // 25.92 DAIx per month
+  // });
+  // details = await carol.details();
+  // console.log(details);
+  
+  await carol.flow({
+    recipient: '0xF538b8d65C4ae4D09503A0F06F38486019750Aa4',
+    flowRate: '0' 
+  });
+  details = await carol.details();
+  console.log(details);
 }
 
 function WalletButton({ provider, loadWeb3Modal, logoutOfWeb3Modal }) {
@@ -91,8 +138,8 @@ function App() {
           Edit <code>packages/react-app/src/App.js</code> and save to reload.
         </p>
         {/* Remove the "hidden" prop and open the JavaScript console in the browser to see what this function does */}
-        <Button hidden onClick={() => readOnChainData()}>
-          Read On-Chain Balance
+        <Button onClick={() => setupSF()}>
+          Setup SuperFluid
         </Button>
         <Link href="https://ethereum.org/developers/#getting-started" style={{ marginTop: "8px" }}>
           Learn Ethereum
