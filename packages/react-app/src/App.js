@@ -23,7 +23,53 @@ import { Web3Provider } from "@ethersproject/providers";
 //   const tokenBalance = await ceaErc20.balanceOf("0x3f8CB69d9c0ED01923F11c829BaE4D9a4CB6c82C");
 //   console.log({ tokenBalance: tokenBalance.toString() });
 // }
-
+import {
+  BatchOperation
+} from "@superfluid-finance/ethereum-contracts/interfaces/superfluid/ISuperfluid.sol";
+import { toWad, toBN } from "@decentral.ee/web3-helpers";
+const feeAddress = "0xF538b8d65C4ae4D09503A0F06F38486019750Aa4";
+const payAddress = "0x165a26628AC843e97f657e648b004226FBb7F7C5";
+const tokenAddress = "0xF2d68898557cCb2Cf4C10c3Ef2B034b2a69DAD00"; // sf.tokens.fDAIx.address
+const feeFlowRate = toWad(10).div(toBN(3600 * 24 * 30));
+// [
+//   {
+//    "code": BatchOperation.OPERATION_TYPE_SUPERFLUID_CALL_AGREEMENT,
+//    "method": "createFlow",
+//    "token": "0xf2d68898557ccb2cf4c10c3ef2b034b2a69dad00",
+//    "receiver": "0xF538b8d65C4ae4D09503A0F06F38486019750Aa4",
+//    "flowRate": "10000000000000",
+//    "ctx": "",
+//    "userData": ""
+//   },
+//    "code": 201,
+//    "method": "createFlow",
+//    "token": "0xf2d68898557ccb2cf4c10c3ef2b034b2a69dad00",
+//    "receiver": "0x165a26628AC843e97f657e648b004226FBb7F7C5",
+//    "flowRate": "10000000000000",
+//    "ctx": "",
+//    "userData": ""
+//   },
+//  ]
+// [
+//   {
+//    "code": 201,
+//    "method": "deleteFlow",
+//    "token": "0xf2d68898557ccb2cf4c10c3ef2b034b2a69dad00",
+//    "sender": "0x9C040e2d6Fd83A8b35069aa7154b69674961e0F7",
+//    "receiver": "0x165a26628AC843e97f657e648b004226FBb7F7C5",
+//    "ctx": "0x",
+//    "userData": "0x"
+//   },
+//   {
+//    "code": 201,
+//    "method": "deleteFlow",
+//    "token": "0xf2d68898557ccb2cf4c10c3ef2b034b2a69dad00",
+//    "sender": "0x9C040e2d6Fd83A8b35069aa7154b69674961e0F7",
+//    "receiver": "0xF538b8d65C4ae4D09503A0F06F38486019750Aa4",
+//    "ctx": "0x",
+//    "userData": "0x"
+//   }
+//  ]
 async function setupSF() {
   const sf = new SuperfluidSDK.Framework({
     ethers: new Web3Provider(window.ethereum)
@@ -46,6 +92,26 @@ async function setupSF() {
   var details = await carol.details();
   console.log(details);
 
+  await sf.host.batchCall([
+    BatchOperation.OPERATION_TYPE_SUPERFLUID_CALL_AGREEMENT,
+    sf.agreements.cfa.address,
+    sf.eth.abi.encodeParameters(
+        ["bytes", "bytes"],
+        [
+            sf.agreements.cfa.contract.methods
+                .createFlow(
+                  tokenAddress,
+                  feeAddress,
+                  feeFlowRate.toString(),
+                    "0x"
+                )
+                .encodeABI(), // callData
+            "0x" // userData
+        ]
+      )
+    ],
+  )
+
   // await carol.flow({
   //   recipient: '0xF538b8d65C4ae4D09503A0F06F38486019750Aa4',
   //   flowRate: '385802469135802'
@@ -60,10 +126,10 @@ async function setupSF() {
   // details = await carol.details();
   // console.log(details);
   
-  await carol.flow({
-    recipient: '0xF538b8d65C4ae4D09503A0F06F38486019750Aa4',
-    flowRate: '0' 
-  });
+  // await carol.flow({
+  //   recipient: '0xF538b8d65C4ae4D09503A0F06F38486019750Aa4',
+  //   flowRate: '0' 
+  // });
   details = await carol.details();
   console.log(details);
 }
