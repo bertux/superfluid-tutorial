@@ -23,12 +23,12 @@ import { Web3Provider } from "@ethersproject/providers";
 //   const tokenBalance = await ceaErc20.balanceOf("0x3f8CB69d9c0ED01923F11c829BaE4D9a4CB6c82C");
 //   console.log({ tokenBalance: tokenBalance.toString() });
 // }
-import {
-  BatchOperation
-} from "@superfluid-finance/ethereum-contracts/interfaces/superfluid/ISuperfluid.sol";
+// import {
+//   BatchOperation
+// } from "@superfluid-finance/ethereum-contracts";
 import { toWad, toBN } from "@decentral.ee/web3-helpers";
 const feeAddress = "0xF538b8d65C4ae4D09503A0F06F38486019750Aa4";
-const payAddress = "0x165a26628AC843e97f657e648b004226FBb7F7C5";
+// const payAddress = "0x165a26628AC843e97f657e648b004226FBb7F7C5";
 const tokenAddress = "0xF2d68898557cCb2Cf4C10c3Ef2B034b2a69DAD00"; // sf.tokens.fDAIx.address
 const feeFlowRate = toWad(10).div(toBN(3600 * 24 * 30));
 // [
@@ -93,7 +93,7 @@ async function setupSF() {
   console.log(details);
 
   await sf.host.batchCall([
-    BatchOperation.OPERATION_TYPE_SUPERFLUID_CALL_AGREEMENT,
+    201,
     sf.agreements.cfa.address,
     sf.eth.abi.encodeParameters(
         ["bytes", "bytes"],
